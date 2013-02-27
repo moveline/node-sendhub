@@ -1,0 +1,22 @@
+{
+  "name": "sendhub",
+  "version": "0.0.0",
+  "description": "SMS via Sendhub",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/Moveline/node-sendhub.git"
+  },
+  "keywords": [
+    "sms",
+    "sendhub",
+    "text",
+    "message",
+    "moveline"
+  ],
+  "author": "Moveline",
+  "license": "BSD"
+}
