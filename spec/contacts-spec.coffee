@@ -3,14 +3,14 @@ sendhub = require '../src/sendhub'
 should = require 'should'
 
 describe 'contacts', ->
+  before ->
+    sendhub.username('moveline')
+    sendhub.apiKey('moveline-key')
+
+  after ->
+    nock.cleanAll()
+
   describe 'add contacts', ->
-    before ->
-      sendhub.username('moveline')
-      sendhub.apiKey('moveline-key')
-
-    after ->
-      nock.restore()
-
     describe 'with name and number', ->
       before ->
         scope = nock('https://api.sendhub.com')
@@ -56,6 +56,12 @@ describe 'contacts', ->
         ).should.throw()
 
   describe 'list contacts', ->
+    before ->
+      scope = nock('https://api.sendhub.com')
+        .filteringRequestBody(/.*/, '*')
+        .get('/v1/contacts', '*')
+        .reply(200, '[{"id": "1", "name": "Moveline", "number": "9876543210"}]')
+
     it 'returns a list of contacts', (done) ->
       sendhub.listContacts (err, contacts) ->
         should.not.exist(err)

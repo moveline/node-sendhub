@@ -23,7 +23,14 @@ sendHub =
       cb(null, result)
 
   listContacts: (cb) ->
-    cb(new Error('Not implemented'))
+    @request 'GET', '/v1/contacts', (err, contacts) ->
+      if err?
+        return cb(new Error('Could not list contacts'))
+
+      if contacts.length < 1
+        return cb(new Error('No contacts where returned'))
+
+      cb(null, contacts)
 
   request: (method, path, body, cb) ->
     body = body || {}
