@@ -28,7 +28,7 @@ sendHub =
         return cb(new Error('Could not list contacts'))
 
       if contacts.length < 1
-        return cb(new Error('No contacts where returned'))
+        return cb(new Error('No contacts were returned'))
 
       cb(null, contacts)
 
