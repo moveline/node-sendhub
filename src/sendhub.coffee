@@ -22,6 +22,9 @@ sendHub =
 
       cb(null, result)
 
+  listContacts: (cb) ->
+    cb(new Error('Not implemented'))
+
   request: (method, path, body, cb) ->
     body = body || {}
 
@@ -40,7 +43,7 @@ sendHub =
       hostname: 'api.sendhub.com'
 
     if method in ['POST', 'PUT']
-      options.header = 
+      options.header =
         'Content-Type': 'application/x-www-form-urlencoded',
         'Content-Length': postData.length
 
@@ -63,9 +66,4 @@ sendHub =
     req.write(postData)
     req.end()
 
-<<<<<<< HEAD
 module.exports = sendHub
-=======
-
-module.exports = sendHub
->>>>>>> c9c46ceb7626e7363a5f73d0c26d7b4d751ec8dd
