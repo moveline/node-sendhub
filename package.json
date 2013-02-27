@@ -6,6 +6,7 @@
   "devDependencies": {
     "coffee-script": ">= 0",
     "mocha": ">= 0",
+    "nock": ">= 0",
     "should": ">= 0"
   },
   "scripts": {

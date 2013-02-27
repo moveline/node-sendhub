@@ -1,35 +1,53 @@
 https = require 'https'
+querystring = require 'querystring'
 
-sendHub = {
-    config: {}
+sendHub =
+  config: {}
 
-    username: (username) ->
-      @config.username = username
+  username: (username) ->
+    @config.username = username
 
-    apiKey: (apiKey) ->
-      @config.apiKey = apiKey
+  apiKey: (apiKey) ->
+    @config.apiKey = apiKey
 
-    createContact: ({name, number}, cb) ->
-      unless name? and number?
-        throw new Error 'createContact requires name and number'
-      unless number.length is 10
-        throw new Error 'createContact number length must be 10'
+  createContact: ({name, number}, cb) ->
+    unless name? and number?
+      throw new Error 'createContact requires name and number'
+    unless number.length is 10
+      throw new Error 'createContact number length must be 10'
 
-      options = {
-        hostname: 'api.sendhub.com'
-        path: "/v1/contacts/?username=#{@config.username}&api_key=#{@config.apiKey}"
-        method: 'POST'
-      }
+    contactData = querystring.stringify
+      username: @config.username
+      apiKey: @config.apiKey
+      name: name
+      number: number
 
-      req = https.request options, (res) ->
-        console.log "statusCode: ", res.statusCode
-        console.log "headers: ", res.headers
+    options =
+      hostname: 'api.sendhub.com'
+      path: '/v1/contacts'
+      method: 'POST'
+      headers:
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Length': contactData.length
 
-        res.on 'data', (d) ->
-          console.log d
+    req = https.request options, (res) ->
+      unless res.statusCode is 201
+        return cb(new Error('Could not create contact'))
 
-      req.end()
+      res.setEncoding('utf8');
 
-      req.on 'error', (e) ->
-        console.log e
-}
+      body = ''
+      res.on 'data', (chunk) ->
+        body += chunk
+
+      res.on 'end', ->
+        cb(null, JSON.parse(body))
+
+
+    req.on 'error', (e) ->
+      cb(e)
+
+    req.write(contactData)
+    req.end()
+
+module.exports = sendHub
