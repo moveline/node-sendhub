@@ -2,9 +2,16 @@
   "name": "sendhub",
   "version": "0.0.0",
   "description": "SMS via Sendhub",
-  "main": "index.js",
+  "main": "lib/sendhub.js",
+  "devDependencies": {
+    "coffee-script": ">= 0",
+    "mocha": ">= 0",
+    "should": ">= 0"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "prepublish": "make generate-js",
+    "postpublish": "make clean",
+    "test": "make test"
   },
   "repository": {
     "type": "git",
@@ -18,5 +25,5 @@
     "moveline"
   ],
   "author": "Moveline",
-  "license": "BSD"
+  "license": "MIT"
 }
