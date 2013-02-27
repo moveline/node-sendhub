@@ -8,6 +8,8 @@ sendHub = {
       @config.apiKey = apiKey
 
     createContact: ({name, number}) ->
+
+    listContacts: ->
 }
 
 module.exports = sendHub

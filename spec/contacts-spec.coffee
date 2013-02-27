@@ -20,3 +20,10 @@ describe 'contacts', ->
       ( ->
         sendhub.createContact(name: 'Adam Gibbons', number: '444')
       ).should.throw()
+
+  describe 'list all contacts', ->
+     it 'returns a list of contacts', (done) ->
+       sendhub.listContacts (err, contacts) ->
+         should.not.exist(err)
+         contacts.length.should.be.above(0)
+         done()
