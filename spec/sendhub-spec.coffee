@@ -10,8 +10,8 @@ describe 'sendhub', ->
       sendhub.username('moveline')
     ).should.not.throw()
 
-  it 'takes token', ->
+  it 'takes api key', ->
     ( ->
-      sendhub.token('moveline-token')
+      sendhub.apiKey('moveline-key')
     ).should.not.throw()
 
