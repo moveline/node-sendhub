@@ -15,7 +15,7 @@ describe 'contacts', ->
       before ->
         scope = nock('https://api.sendhub.com')
           .filteringRequestBody(/.*/, '*')
-          .post('/v1/contacts', '*')
+          .post('/v1/contacts/', '*')
           .reply(201, '{"id": "1", "name": "Adam Gibbons", "number": "9876543210"}')
 
       it 'returns a contact', (done) ->
@@ -28,7 +28,7 @@ describe 'contacts', ->
       before ->
         scope = nock('https://api.sendhub.com')
           .filteringRequestBody(/.*/, '*')
-          .post('/v1/contacts', '*')
+          .post('/v1/contacts/', '*')
           .reply(500, 'SERVER FUCKED')
 
       it 'return an error', (done) ->
@@ -59,7 +59,7 @@ describe 'contacts', ->
     before ->
       scope = nock('https://api.sendhub.com')
         .filteringRequestBody(/.*/, '*')
-        .get('/v1/contacts', '*')
+        .get('/v1/contacts/', '*')
         .reply(200, '[{"id": "1", "name": "Moveline", "number": "9876543210"}]')
 
     it 'returns a list of contacts', (done) ->

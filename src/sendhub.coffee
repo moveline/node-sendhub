@@ -1,6 +1,11 @@
 https = require 'https'
 querystring = require 'querystring'
 
+log =
+  debug: (message) ->
+    if process.env.LOG_LEVEL is 'debug'
+      console.log message
+
 sendHub =
   config: {}
 
@@ -16,14 +21,14 @@ sendHub =
     unless number.length is 10
       throw new Error 'createContact number length must be 10'
 
-    @request 'POST', '/v1/contacts', {name: name, number: number}, (err, result) ->
+    @request 'POST', '/v1/contacts/', {name: name, number: number}, (err, result) ->
       if err?
         return cb(new Error('Could not create contact'))
 
       cb(null, result)
 
   listContacts: (cb) ->
-    @request 'GET', '/v1/contacts', (err, contacts) ->
+    @request 'GET', '/v1/contacts/', (err, contacts) ->
       if err?
         return cb(new Error('Could not list contacts'))
 
@@ -55,6 +60,7 @@ sendHub =
         'Content-Length': postData.length
 
     req = https.request options, (res) ->
+      log.debug "#{path} returned a status code of #{res.statusCode}"
       unless res.statusCode in [200, 201]
         return cb(new Error('Request failed'))
 
@@ -65,6 +71,7 @@ sendHub =
         body += chunk
 
       res.on 'end', ->
+        log.debug body
         cb(null, JSON.parse(body))
 
     req.on 'error', (e) ->
