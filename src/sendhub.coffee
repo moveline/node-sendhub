@@ -84,6 +84,11 @@ sendHub =
     req.end()
 
   sendMessage: ({contact, text}, cb) ->
+    unless contact?.id?
+      throw new Error('sendMessage requires contact')
+    unless text?
+      throw new Error('sendMessage requires text')
+
     body = {contacts: [contact.id], text: text}
 
     @request 'POST', '/v1/messages/', body, (err, response) ->
