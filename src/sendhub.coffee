@@ -27,10 +27,14 @@ sendHub =
       cb(null, result)
 
   listContacts: (cb) ->
-    @request 'GET', '/v1/contacts/', (err, contacts) ->
+    @request 'GET', '/v1/contacts/', (err, response) ->
       if err?
         return cb(new Error('Could not list contacts'))
 
+      unless response.objects?
+        return cb(new Error('Malformed response from sendhub'))
+
+      contacts = response.objects
       if contacts.length < 1
         return cb(new Error('No contacts where returned'))
 
@@ -69,12 +73,8 @@ sendHub =
 
       res.on 'end', ->
         log.debug body
-        response = JSON.parse(body)
 
-        unless response.objects?
-          return cb(new Error('Sendhub did not send back any objects'))
-
-        cb(null, response.objects)
+        cb(null, JSON.parse(body))
 
     req.on 'error', (e) ->
       cb(e)
