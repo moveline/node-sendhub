@@ -32,7 +32,11 @@ describe 'contacts', ->
       before ->
         scope = nock('https://api.sendhub.com')
           .filteringRequestBody(/.*/, '*')
-          .post('/v1/contacts/', '*')
+          .filteringPath( (path) ->
+            path = path.replace(/username=[^&]*/g, 'username=XXX')
+            path = path.replace(/api_key=[^&]*/g, 'api_key=XXX')
+          )
+          .post('/v1/contacts/?username=XXX&api_key=XXX', '*')
           .reply(500, 'SERVER FUCKED')
 
       it 'return an error', (done) ->
