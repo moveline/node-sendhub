@@ -1,5 +1,9 @@
 https = require 'https'
-querystring = require 'querystring'
+
+log =
+  debug: (message) ->
+    if process.env.LOG_LEVEL is 'debug'
+      console.log message
 
 sendHub =
   config: {}
@@ -16,17 +20,21 @@ sendHub =
     unless number.length is 10
       throw new Error 'createContact number length must be 10'
 
-    @request 'POST', '/v1/contacts', {name: name, number: number}, (err, result) ->
+    @request 'POST', '/v1/contacts/', {name: name, number: number}, (err, result) ->
       if err?
         return cb(new Error('Could not create contact'))
 
       cb(null, result)
 
   listContacts: (cb) ->
-    @request 'GET', '/v1/contacts', (err, contacts) ->
+    @request 'GET', '/v1/contacts/', (err, response) ->
       if err?
         return cb(new Error('Could not list contacts'))
 
+      unless response.objects?
+        return cb(new Error('Malformed response from sendhub'))
+
+      contacts = response.objects
       if contacts.length < 1
         return cb(new Error('No contacts were returned'))
 
@@ -39,22 +47,21 @@ sendHub =
       cb = body
       body = {}
 
-    body.username = @config.username
-    body.api_key = @config.apiKey
+    payload = JSON.stringify body
 
-    postData = querystring.stringify body
-
+    authPath = "#{path}?username=#{@config.username}&api_key=#{@config.apiKey}"
     options =
       method: method
-      path: path
+      path: authPath
       hostname: 'api.sendhub.com'
 
     if method in ['POST', 'PUT']
       options.header =
         'Content-Type': 'application/x-www-form-urlencoded',
-        'Content-Length': postData.length
+        'Content-Length': payload.length
 
     req = https.request options, (res) ->
+      log.debug "#{authPath} returned a status code of #{res.statusCode}"
       unless res.statusCode in [200, 201]
         return cb(new Error('Request failed'))
 
@@ -65,12 +72,30 @@ sendHub =
         body += chunk
 
       res.on 'end', ->
+        log.debug body
+
         cb(null, JSON.parse(body))
 
     req.on 'error', (e) ->
       cb(e)
 
-    req.write(postData)
+    if method in ['POST', 'PUT']
+      req.write(payload)
     req.end()
+
+  sendMessage: ({contact, text}, cb) ->
+    unless contact?.id?
+      throw new Error('sendMessage requires contact')
+    unless text?
+      throw new Error('sendMessage requires text')
+
+    body = {contacts: [contact.id], text: text}
+
+    @request 'POST', '/v1/messages/', body, (err, response) ->
+      if err?
+        return cb(new Error('Could not send message'))
+
+      cb(null, response)
+
 
 module.exports = sendHub
