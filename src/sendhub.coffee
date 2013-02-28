@@ -48,12 +48,9 @@ sendHub =
       body = {}
 
     payload = JSON.stringify body
+    console.log payload
 
-    fslash = ''
-    if method is 'POST'
-      fslash = '\\'
-
-    authPath = "#{path}?username=#{@config.username}#{fslash}&api_key=#{@config.apiKey}"
+    authPath = "#{path}?username=#{@config.username}&api_key=#{@config.apiKey}"
     options =
       method: method
       path: authPath
@@ -61,10 +58,11 @@ sendHub =
 
     if method in ['POST', 'PUT']
       options.header =
-        'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Type': 'application/json',
         'Content-Length': payload.length
 
     req = https.request options, (res) ->
+      console.log res.headers
       log.debug "#{authPath} returned a status code of #{res.statusCode}"
       unless res.statusCode in [200, 201]
         return cb(new Error('Request failed'))
@@ -93,7 +91,7 @@ sendHub =
     unless text?
       throw new Error('sendMessage requires text')
 
-    body = {contacts: [contact.id], text: text}
+    body = {"contacts": [contact.id], "text": text}
 
     @request 'POST', '/v1/messages/', body, (err, response) ->
       if err?
