@@ -83,4 +83,7 @@ sendHub =
       req.write(payload)
     req.end()
 
+  sendMessage: ({contact, text}, cb) ->
+    cb(new Error('Not Implemented!!'))
+
 module.exports = sendHub
