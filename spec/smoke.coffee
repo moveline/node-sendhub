@@ -16,3 +16,9 @@ if process.env.SENDHUB_USERNAME? or process.env.SENDHUB_APIKEY?
           should.not.exist(err)
           contacts.length.should.be.above(0)
           done()
+
+    describe 'send message', ->
+      it 'is successful', (done) ->
+        sendhub.sendMessage {contact: {id: 1}, text: 'Testing from node package'}, (err, response) ->
+          should.not.exist(err)
+          response.acknowledgment.should.equal 'Message queued for sending.'
