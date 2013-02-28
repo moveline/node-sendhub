@@ -44,14 +44,12 @@ sendHub =
       cb = body
       body = {}
 
-    body.username = @config.username
-    body.api_key = @config.apiKey
-
     postData = querystring.stringify body
 
+    authPath = "#{path}?username=#{@config.username}&api_key=#{@config.apiKey}"
     options =
       method: method
-      path: path
+      path: authPath
       hostname: 'api.sendhub.com'
 
     if method in ['POST', 'PUT']
@@ -60,7 +58,7 @@ sendHub =
         'Content-Length': postData.length
 
     req = https.request options, (res) ->
-      log.debug "#{path} returned a status code of #{res.statusCode}"
+      log.debug "#{authPath} returned a status code of #{res.statusCode}"
       unless res.statusCode in [200, 201]
         return cb(new Error('Request failed'))
 
@@ -72,12 +70,18 @@ sendHub =
 
       res.on 'end', ->
         log.debug body
-        cb(null, JSON.parse(body))
+        response = JSON.parse(body)
+
+        unless response.objects?
+          return cb(new Error('Sendhub did not send back any objects'))
+
+        cb(null, response.objects)
 
     req.on 'error', (e) ->
       cb(e)
 
-    req.write(postData)
+    if method in ['POST', 'PUT']
+      req.write(postData)
     req.end()
 
 module.exports = sendHub
