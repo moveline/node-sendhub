@@ -84,6 +84,13 @@ sendHub =
     req.end()
 
   sendMessage: ({contact, text}, cb) ->
-    cb(new Error('Not Implemented!!'))
+    body = {contacts: [contact.id], text: text}
+
+    @request 'POST', '/v1/messages/', body, (err, response) ->
+      if err?
+        return cb(new Error('Could not send message'))
+
+      cb(null, response)
+
 
 module.exports = sendHub
