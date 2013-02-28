@@ -28,3 +28,13 @@ describe 'messages', ->
           should.not.exist(err)
           response.acknowledgment.should.equal 'Message queued for sending.'
           done()
+
+    describe 'when developer does not set required fields', ->
+      it 'throws an error for contact', ->
+        (->
+          sendhub.sendMessage(text: 'Testing')
+        ).should.throw()
+      it 'throws an error for text', ->
+        (->
+          sendhub.sendMessage(contact: {id: 1, name: 'Adam Gibbons'})
+        ).should.throw()
