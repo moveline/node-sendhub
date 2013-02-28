@@ -58,9 +58,12 @@ describe 'contacts', ->
   describe 'list contacts', ->
     before ->
       scope = nock('https://api.sendhub.com')
-        .filteringRequestBody(/.*/, '*')
-        .get('/v1/contacts/', '*')
-        .reply(200, '[{"id": "1", "name": "Moveline", "number": "9876543210"}]')
+        .filteringPath( (path) ->
+          path = path.replace(/username=[^&]*/g, 'username=XXX')
+          path = path.replace(/api_key=[^&]*/g, 'api_key=XXX')
+        )
+        .get('/v1/contacts/?username=XXX&api_key=XXX')
+        .reply(200, '{"meta": {}, "objects": [{"id": "1", "name": "Moveline", "number": "9876543210"}]}')
 
     it 'returns a list of contacts', (done) ->
       sendhub.listContacts (err, contacts) ->

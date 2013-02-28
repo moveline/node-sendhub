@@ -1,5 +1,4 @@
 https = require 'https'
-querystring = require 'querystring'
 
 log =
   debug: (message) ->
@@ -44,7 +43,7 @@ sendHub =
       cb = body
       body = {}
 
-    postData = querystring.stringify body
+    payload = JSON.stringify body
 
     authPath = "#{path}?username=#{@config.username}&api_key=#{@config.apiKey}"
     options =
@@ -55,7 +54,7 @@ sendHub =
     if method in ['POST', 'PUT']
       options.header =
         'Content-Type': 'application/x-www-form-urlencoded',
-        'Content-Length': postData.length
+        'Content-Length': payload.length
 
     req = https.request options, (res) ->
       log.debug "#{authPath} returned a status code of #{res.statusCode}"
@@ -81,7 +80,7 @@ sendHub =
       cb(e)
 
     if method in ['POST', 'PUT']
-      req.write(postData)
+      req.write(payload)
     req.end()
 
 module.exports = sendHub
