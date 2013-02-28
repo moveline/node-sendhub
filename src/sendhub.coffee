@@ -48,7 +48,6 @@ sendHub =
       body = {}
 
     payload = JSON.stringify body
-    console.log payload
 
     authPath = "#{path}?username=#{@config.username}&api_key=#{@config.apiKey}"
     options =
@@ -62,7 +61,6 @@ sendHub =
         'Content-Length': payload.length
 
     req = https.request options, (res) ->
-      console.log res.headers
       log.debug "#{authPath} returned a status code of #{res.statusCode}"
       unless res.statusCode in [200, 201]
         return cb(new Error('Request failed'))
