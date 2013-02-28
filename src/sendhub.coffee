@@ -49,7 +49,11 @@ sendHub =
 
     payload = JSON.stringify body
 
-    authPath = "#{path}?username=#{@config.username}&api_key=#{@config.apiKey}"
+    fslash = ''
+    if method is 'POST'
+      fslash = '\\'
+
+    authPath = "#{path}?username=#{@config.username}#{fslash}&api_key=#{@config.apiKey}"
     options =
       method: method
       path: authPath

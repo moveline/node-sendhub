@@ -14,4 +14,3 @@ describe 'sendhub', ->
     ( ->
       sendhub.apiKey('moveline-key')
     ).should.not.throw()
-
