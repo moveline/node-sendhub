@@ -48,9 +48,6 @@ sendHub =
         return cb(new Error('Could not list contacts'))
 
       contacts = res.body.objects
-      if contacts.length < 1
-        return cb(new Error('No contacts were returned'))
-
       cb(null, contacts)
 
   sendMessage: ({contact, text}, cb) ->
