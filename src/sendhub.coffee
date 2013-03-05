@@ -1,4 +1,5 @@
-https = require 'https'
+extend = require 'xtend'
+request = require 'request'
 
 log =
   debug: (message) ->
@@ -14,74 +15,43 @@ sendHub =
   apiKey: (apiKey) ->
     @config.apiKey = apiKey
 
+  auth: ->
+    username: @config.username
+    api_key: @config.apiKey
+
   createContact: ({name, number}, cb) ->
     unless name? and number?
       throw new Error 'createContact requires name and number'
     unless number.length is 10
       throw new Error 'createContact number length must be 10'
 
-    @request 'POST', '/v1/contacts/', {name: name, number: number}, (err, result) ->
-      if err?
+    qs = extend @auth()
+
+    json =
+      name: name
+      number: number
+
+    req = request.post 'https://api.sendhub.com/v1/contacts/', {json: json, qs: qs}, (err, res) ->
+      if err? or res.statusCode isnt 201
         return cb(new Error('Could not create contact'))
+      cb(null, res.body)
 
-      cb(null, result)
+  listContacts: (filterOptions, cb) ->
+    if typeof filterOptions is 'function'
+      cb = filterOptions
+      filterOptions = {}
 
-  listContacts: (cb) ->
-    @request 'GET', '/v1/contacts/', (err, response) ->
+    qs = extend @auth(), filterOptions
+
+    req = request.get 'https://api.sendhub.com/v1/contacts/', {json: true, qs: qs}, (err, res) ->
       if err?
         return cb(new Error('Could not list contacts'))
 
-      unless response.objects?
-        return cb(new Error('Malformed response from sendhub'))
-
-      contacts = response.objects
+      contacts = res.body.objects
       if contacts.length < 1
         return cb(new Error('No contacts were returned'))
 
       cb(null, contacts)
-
-  request: (method, path, body, cb) ->
-    body = body || {}
-
-    if typeof body is 'function'
-      cb = body
-      body = {}
-
-    payload = JSON.stringify body
-
-    authPath = "#{path}?username=#{@config.username}&api_key=#{@config.apiKey}"
-    options =
-      method: method
-      path: authPath
-      hostname: 'api.sendhub.com'
-
-    if method in ['POST', 'PUT']
-      options.header =
-        'Content-Type': 'application/json',
-        'Content-Length': payload.length
-
-    req = https.request options, (res) ->
-      log.debug "#{authPath} returned a status code of #{res.statusCode}"
-      unless res.statusCode in [200, 201]
-        return cb(new Error('Request failed'))
-
-      res.setEncoding('utf8');
-
-      body = ''
-      res.on 'data', (chunk) ->
-        body += chunk
-
-      res.on 'end', ->
-        log.debug body
-
-        cb(null, JSON.parse(body))
-
-    req.on 'error', (e) ->
-      cb(e)
-
-    if method in ['POST', 'PUT']
-      req.write(payload)
-    req.end()
 
   sendMessage: ({contact, text}, cb) ->
     unless contact?.id?
@@ -89,13 +59,17 @@ sendHub =
     unless text?
       throw new Error('sendMessage requires text')
 
-    body = {"contacts": [contact.id], "text": text}
+    qs = extend @auth()
 
-    @request 'POST', '/v1/messages/', body, (err, response) ->
+    json =
+      contacts: [contact.id]
+      text: text
+
+    req = request.post 'https://api.sendhub.com/v1/messages/', {json: json, qs: qs}, (err, res) ->
       if err?
         return cb(new Error('Could not send message'))
 
-      cb(null, response)
+      cb(null, res.body)
 
 
 module.exports = sendHub

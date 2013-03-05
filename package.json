@@ -3,6 +3,10 @@
   "version": "0.1.0",
   "description": "SMS via Sendhub",
   "main": "lib/sendhub.js",
+  "dependencies": {
+    "request": "2.14.x",
+    "xtend": "2.0.x"
+  },
   "devDependencies": {
     "coffee-script": ">= 0",
     "mocha": ">= 0",

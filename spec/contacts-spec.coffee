@@ -79,3 +79,39 @@ describe 'contacts', ->
         contacts.length.should.be.above(0)
         done()
 
+    describe 'when a limit is given', (done) ->
+      before ->
+        scope = nock('https://api.sendhub.com')
+          .filteringPath( (path) ->
+            path = path.replace(/username=[^&]*/g, 'username=XXX')
+            path = path.replace(/api_key=[^&]*/g, 'api_key=XXX')
+          )
+          .get('/v1/contacts/?username=XXX&api_key=XXX&limit=1')
+          .reply(200, '{"meta": {}, "objects": [{"id": "1", "name": "Moveline", "number": "1234567890"}]}')
+
+      it 'returns a list less or equal to the limit', ->
+        sendhub.listContacts {limit: 1}, (err, contacts) ->
+          should.not.exist(err)
+          contacts.length.should.be.above(0).and.be.below(2)
+
+    describe 'when filtering by number', (done) ->
+      before ->
+        scope = nock('https://api.sendhub.com')
+          .filteringPath( (path) ->
+            path = path.replace(/username=[^&]*/g, 'username=XXX')
+            path = path.replace(/api_key=[^&]*/g, 'api_key=XXX')
+            path = path.replace(/number=[^&]*/g, 'number=XXX')
+          )
+          .get('/v1/contacts/?username=XXX&api_key=XXX&number=XXX')
+          .reply(200, '{"meta": {}, "objects": [{"id": "1", "name": "Moveline", "number": "1234567890"}]}')
+
+      it 'returns a list of contacts with the number', (done) ->
+        sendhub.listContacts {number: '1234567890'}, (err, contacts) ->
+          should.not.exist(err)
+          contacts.should.have.length(1)
+
+          contacts.forEach (contact) ->
+            contact.should.have.property('number').with.eql('1234567890')
+
+          done()
+
