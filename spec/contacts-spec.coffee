@@ -2,7 +2,7 @@ nock = require 'nock'
 sendhub = require '../src/sendhub'
 should = require 'should'
 
-describe 'contacts', ->
+describe.only 'contacts', ->
   before ->
     sendhub.username('moveline')
     sendhub.apiKey('moveline-key')
@@ -12,7 +12,7 @@ describe 'contacts', ->
 
   describe 'add contacts', ->
     describe 'with name and number', ->
-      before ->
+      beforeEach ->
         scope = nock('https://api.sendhub.com')
           .filteringRequestBody(/.*/, '*')
           .filteringPath( (path) ->
@@ -24,6 +24,12 @@ describe 'contacts', ->
 
       it 'returns a contact', (done) ->
         sendhub.createContact {number: '9876543210', name: 'Adam Gibbons'}, (err, contact) ->
+          should.not.exist(err)
+          contact.should.have.keys ['id', 'name', 'number']
+          done()
+
+      it 'handles numbers prefixed with +1', (done) ->
+        sendhub.createContact {number: '+19876543210', name: 'Adam Gibbons'}, (err, contact) ->
           should.not.exist(err)
           contact.should.have.keys ['id', 'name', 'number']
           done()
@@ -58,7 +64,7 @@ describe 'contacts', ->
           sendhub.createContact(name: 'Adam Gibbons', number: '444')
         ).should.throw()
 
-      it 'throws an error for number over 10 digits', ->
+      it 'throws an error for number over 10 digits that doesn\'nt begin with +1', ->
         ( ->
           sendhub.createContact(name: 'Adam Gibbons', number: '98765432109')
         ).should.throw()
@@ -114,4 +120,3 @@ describe 'contacts', ->
             contact.should.have.property('number').with.eql('1234567890')
 
           done()
-

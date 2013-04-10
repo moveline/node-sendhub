@@ -22,8 +22,12 @@ sendHub =
   createContact: ({name, number}, cb) ->
     unless name? and number?
       throw new Error 'createContact requires name and number'
-    unless number.length is 10
-      throw new Error 'createContact number length must be 10'
+    switch number.length
+      when 10
+        number
+      when 12
+        number = number[2..]
+      else throw new Error 'createContact number length must be 10'
 
     qs = extend @auth()
 
@@ -33,6 +37,7 @@ sendHub =
 
     req = request.post 'https://api.sendhub.com/v1/contacts/', {json: json, qs: qs}, (err, res) ->
       if err? or res.statusCode isnt 201
+        console.log res.statusCode
         return cb(new Error('Could not create contact'))
       cb(null, res.body)
 
