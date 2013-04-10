@@ -2,7 +2,7 @@ nock = require 'nock'
 sendhub = require '../src/sendhub'
 should = require 'should'
 
-describe.only 'contacts', ->
+describe 'contacts', ->
   before ->
     sendhub.username('moveline')
     sendhub.apiKey('moveline-key')

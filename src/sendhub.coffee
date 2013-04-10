@@ -37,7 +37,6 @@ sendHub =
 
     req = request.post 'https://api.sendhub.com/v1/contacts/', {json: json, qs: qs}, (err, res) ->
       if err? or res.statusCode isnt 201
-        console.log res.statusCode
         return cb(new Error('Could not create contact'))
       cb(null, res.body)
 
