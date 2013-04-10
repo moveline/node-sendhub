@@ -55,10 +55,17 @@ describe 'contacts', ->
         (->
           sendhub.createContact(number: '9876543210')
         ).should.throw()
+
       it 'throws an error for number', ->
         (->
           sendhub.createContact(name: 'Adam Gibbons')
         ).should.throw()
+
+      it 'throws an error when number has 10 letters', ->
+        ( ->
+          sendhub.createContact(name: 'Adam Gibbons', number: 'abcdefghij')
+        ).should.throw()
+
       it 'throws an error for number under 10 digits', ->
         ( ->
           sendhub.createContact(name: 'Adam Gibbons', number: '444')

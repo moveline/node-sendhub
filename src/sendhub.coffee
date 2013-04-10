@@ -22,12 +22,17 @@ sendHub =
   createContact: ({name, number}, cb) ->
     unless name? and number?
       throw new Error 'createContact requires name and number'
-    switch number.length
-      when 10
-        number
-      when 12
-        number = number[2..]
-      else throw new Error 'createContact number length must be 10'
+
+    if number.match(/[^\d+]/)
+      throw new Error 'createContact number must only be digits'
+
+    # Removes +1 country code
+    if number.length is 12 and number.indexOf('+1') is 0
+      number = number[2..]
+
+    # Sendhub only supports 10 digits
+    unless number.length is 10
+      throw new Error 'createContact number length must be 10'
 
     qs = extend @auth()
 
@@ -35,6 +40,7 @@ sendHub =
       name: name
       number: number
 
+    log.debug "Sendhub Request: Create Contact ('#{name}', #{number})"
     req = request.post 'https://api.sendhub.com/v1/contacts/', {json: json, qs: qs}, (err, res) ->
       if err? or res.statusCode isnt 201
         return cb(new Error('Could not create contact'))
@@ -47,6 +53,7 @@ sendHub =
 
     qs = extend @auth(), filterOptions
 
+    log.debug "Sendhub Request: List Contacts"
     req = request.get 'https://api.sendhub.com/v1/contacts/', {json: true, qs: qs}, (err, res) ->
       if err?
         return cb(new Error('Could not list contacts'))
@@ -66,6 +73,7 @@ sendHub =
       contacts: [contact.id]
       text: text
 
+    log.debug "Sendhub Request: Send Message (#{contact.id}, text)"
     req = request.post 'https://api.sendhub.com/v1/messages/', {json: json, qs: qs}, (err, res) ->
       if err?
         return cb(new Error('Could not send message'))
